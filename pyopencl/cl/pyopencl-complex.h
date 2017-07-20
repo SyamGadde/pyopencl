@@ -34,76 +34,76 @@
   \
   inline REAL_TP TPROOT##_real(TP a) { return a.real; } \
   inline REAL_TP TPROOT##_imag(TP a) { return a.imag; }        \
-  inline REAL_TP TPROOT##_abs(TP a) { return hypot(a.real, a.imag); }   \
-  inline REAL_TP TPROOT##_abs_squared(TP a) { return a.real * a.real + a.imag * a.imag; } \
+  inline REAL_TP TPROOT##_abs(TP a) { return hypot(TPROOT##_real(a), TPROOT##_imag(a)); }   \
+  inline REAL_TP TPROOT##_abs_squared(TP a) { return TPROOT##_real(a) * TPROOT##_real(a) + TPROOT##_imag(a) * TPROOT##_imag(a); } \
   \
   inline TP TPROOT##_new(REAL_TP real, REAL_TP imag)  \
   { \
     TP result; \
-    result.real = real; \
-    result.imag = imag; \
+    TPROOT##_real(result) = real;		\
+    TPROOT##_imag(result) = imag;		\
     return result; \
   } \
   \
   inline TP TPROOT##_fromreal(REAL_TP real)     \
   { \
     TP result; \
-    result.real = real; \
-    result.imag = 0; \
+    TPROOT##_real(result) = real;		\
+    TPROOT##_imag(imag) = 0;			\
     return result; \
   } \
   \
   \
-  inline TP TPROOT##_neg(TP a) { return TPROOT##_new(-a.real, -a.imag); } \
-  inline TP TPROOT##_conj(TP a) { return TPROOT##_new(a.real, -a.imag); } \
+  inline TP TPROOT##_neg(TP a) { return TPROOT##_new(-TPROOT##_real(a), -TPROOT##_imag(a)); } \
+  inline TP TPROOT##_conj(TP a) { return TPROOT##_new(TPROOT##_real(a), -TPROOT##_imag(a)); } \
   \
   inline TP TPROOT##_add(TP a, TP b)            \
   { \
-    return TPROOT##_new(a.real + b.real, a.imag + b.imag); \
+      return TPROOT##_new(TPROOT##_real(a) + TPROOT##_real(b), TPROOT##_imag(a) + TPROOT##_imag(b)); \
     ; \
   } \
   inline TP TPROOT##_addr(TP a, REAL_TP b)      \
   { \
-    return TPROOT##_new(b+a.real, a.imag); \
+    return TPROOT##_new(b+TPROOT##_real(a), TPROOT##_imag(a)); \
   } \
   inline TP TPROOT##_radd(REAL_TP a, TP b)      \
   { \
-    return TPROOT##_new(a+b.real, b.imag); \
+      return TPROOT##_new(a+TPROOT##_real(b), TPROOT##_imag(b));	\
   } \
   \
   inline TP TPROOT##_sub(TP a, TP b)            \
   { \
-    return TPROOT##_new(a.real - b.real, a.imag - b.imag); \
+    return TPROOT##_new(TPROOT##_real(a) - TPROOT##_real(b), TPROOT##_imag(a) - TPROOT##_imag(b)); \
     ; \
   } \
   \
   inline TP TPROOT##_mul(TP a, TP b)            \
   { \
     return TPROOT##_new( \
-        a.real*b.real - a.imag*b.imag, \
-        a.real*b.imag + a.imag*b.real); \
+        TPROOT##_real(a)*TPROOT##_real(b) - TPROOT##_imag(a)*TPROOT##_imag(b), \
+        TPROOT##_real(a)*TPROOT##_imag(b) + TPROOT##_imag(a)*TPROOT##_real(b)); \
   } \
   \
   inline TP TPROOT##_mulr(TP a, REAL_TP b)      \
   { \
-    return TPROOT##_new(a.real*b, a.imag*b); \
+    return TPROOT##_new(TPROOT##_real(a)*b, TPROOT##_imag(a)*b); \
   } \
   \
   inline TP TPROOT##_rmul(REAL_TP a, TP b)      \
   { \
-    return TPROOT##_new(a*b.real, a*b.imag); \
+    return TPROOT##_new(a*TPROOT##_real(b), a*TPROOT##_imag(b)); \
   } \
   \
   inline TP TPROOT##_rdivide(REAL_TP z1, TP z2) \
   { \
-    if (fabs(z2.real) <= fabs(z2.imag)) { \
-      REAL_TP ratio = z2.real / z2.imag; \
-      REAL_TP denom = z2.imag * (1 + ratio * ratio); \
+    if (fabs(TPROOT##_real(z2)) <= fabs(TPROOT##_imag(z2))) { \
+      REAL_TP ratio = TPROOT##_real(z2) / TPROOT##_imag(z2); \
+      REAL_TP denom = TPROOT##_imag(z2) * (1 + ratio * ratio); \
       return TPROOT##_new((z1 * ratio) / denom, - z1 / denom); \
     } \
     else { \
-      REAL_TP ratio = z2.imag / z2.real; \
-      REAL_TP denom = z2.real * (1 + ratio * ratio); \
+      REAL_TP ratio = TPROOT##_imag(z2) / TPROOT##_real(z2); \
+      REAL_TP denom = TPROOT##_real(z2) * (1 + ratio * ratio); \
       return TPROOT##_new(z1 / denom, - (z1 * ratio) / denom); \
     } \
   } \
@@ -112,21 +112,21 @@
   { \
     REAL_TP ratio, denom, a, b, c, d; \
     \
-    if (fabs(z2.real) <= fabs(z2.imag)) { \
-      ratio = z2.real / z2.imag; \
-      denom = z2.imag; \
-      a = z1.imag; \
-      b = z1.real; \
-      c = -z1.real; \
-      d = z1.imag; \
+    if (fabs(TPROOT##_real(z2)) <= fabs(TPROOT##_imag(z2))) { \
+      ratio = TPROOT##_real(z2) / TPROOT##_imag(z2); \
+      denom = TPROOT##_imag(z2); \
+      a = TPROOT##_imag(z1); \
+      b = TPROOT##_real(z1); \
+      c = -TPROOT##_real(z1); \
+      d = TPROOT##_imag(z1); \
     } \
     else { \
-      ratio = z2.imag / z2.real; \
-      denom = z2.real; \
-      a = z1.real; \
-      b = z1.imag; \
-      c = z1.imag; \
-      d = -z1.real; \
+      ratio = TPROOT##_imag(z2) / TPROOT##_real(z2); \
+      denom = TPROOT##_real(z2); \
+      a = TPROOT##_real(z1); \
+      b = TPROOT##_imag(z1); \
+      c = TPROOT##_imag(z1); \
+      d = -TPROOT##_real(z1); \
     } \
     denom *= (1 + ratio * ratio); \
     return TPROOT##_new( \
@@ -136,15 +136,15 @@
   \
   inline TP TPROOT##_divider(TP a, REAL_TP b)   \
   { \
-    return TPROOT##_new(a.real/b, a.imag/b); \
+    return TPROOT##_new(TPROOT##_real(a)/b, TPROOT##_imag(a)/b); \
   } \
   \
   inline TP TPROOT##_pow(TP a, TP b)            \
   { \
-    REAL_TP logr = log(hypot(a.real, a.imag)); \
-    REAL_TP logi = atan2(a.imag, a.real); \
-    REAL_TP x = exp(logr * b.real - logi * b.imag); \
-    REAL_TP y = logr * b.imag + logi * b.real; \
+    REAL_TP logr = log(hypot(TPROOT##_real(a), TPROOT##_imag(a))); \
+    REAL_TP logi = atan2(TPROOT##_imag(a), TPROOT##_real(a)); \
+    REAL_TP x = exp(logr * TPROOT##_real(b) - logi * TPROOT##_imag(b)); \
+    REAL_TP y = logr * TPROOT##_imag(b) + logi * TPROOT##_real(b); \
     \
     REAL_TP cosy; \
     REAL_TP siny = sincos(y, &cosy); \
@@ -153,8 +153,8 @@
   \
   inline TP TPROOT##_powr(TP a, REAL_TP b)      \
   { \
-    REAL_TP logr = log(hypot(a.real, a.imag)); \
-    REAL_TP logi = atan2(a.imag, a.real); \
+    REAL_TP logr = log(hypot(TPROOT##_real(a), TPROOT##_imag(a))); \
+    REAL_TP logi = atan2(TPROOT##_imag(a), TPROOT##_real(a)); \
     REAL_TP x = exp(logr * b); \
     REAL_TP y = logi * b; \
     \
@@ -167,8 +167,8 @@
   inline TP TPROOT##_rpow(REAL_TP a, TP b)      \
   { \
     REAL_TP logr = log(a); \
-    REAL_TP x = exp(logr * b.real); \
-    REAL_TP y = logr * b.imag; \
+    REAL_TP x = exp(logr * TPROOT##_real(b)); \
+    REAL_TP y = logr * TPROOT##_imag(b); \
     \
     REAL_TP cosy; \
     REAL_TP siny = sincos(y, &cosy); \
@@ -177,54 +177,54 @@
   \
   inline TP TPROOT##_sqrt(TP a)                 \
   { \
-    REAL_TP re = a.real; \
-    REAL_TP im = a.imag; \
+    REAL_TP re = TPROOT##_real(a); \
+    REAL_TP im = TPROOT##_imag(a); \
     REAL_TP mag = hypot(re, im); \
     TP result; \
     \
     if (mag == 0.f) { \
-      result.real = result.imag = 0.f; \
+      TPROOT##_real(result) = TPROOT##_imag(result) = 0.f; \
     } else if (re > 0.f) { \
-      result.real = sqrt(0.5f * (mag + re)); \
-      result.imag = im/result.real/2.f; \
+      TPROOT##_real(result) = sqrt(0.5f * (mag + re)); \
+      TPROOT##_imag(result) = im/TPROOT##_real(result)/2.f; \
     } else { \
-      result.imag = sqrt(0.5f * (mag - re)); \
+      TPROOT##_imag(result) = sqrt(0.5f * (mag - re)); \
       if (im < 0.f) \
-        result.imag = - result.imag; \
-      result.real = im/result.imag/2.f; \
+        TPROOT##_imag(result) = - TPROOT##_imag(result); \
+      TPROOT##_real(result) = im/TPROOT##_imag(result)/2.f; \
     } \
     return result; \
   } \
   \
   inline TP TPROOT##_exp(TP a) \
   { \
-    REAL_TP expr = exp(a.real); \
+    REAL_TP expr = exp(TPROOT##_real(a)); \
     REAL_TP cosi; \
-    REAL_TP sini = sincos(a.imag, &cosi); \
+    REAL_TP sini = sincos(TPROOT##_imag(a), &cosi); \
     return TPROOT##_new(expr * cosi, expr * sini); \
   } \
   \
   inline TP TPROOT##_log(TP a)                                                 \
-  { return TPROOT##_new(log(hypot(a.real, a.imag)), atan2(a.imag, a.real)); } \
+  { return TPROOT##_new(log(hypot(TPROOT##_real(a), TPROOT##_imag(a))), atan2(TPROOT##_imag(a), TPROOT##_real(a))); } \
   \
   inline TP TPROOT##_sin(TP a) \
   { \
     REAL_TP cosr; \
-    REAL_TP sinr = sincos(a.real, &cosr); \
-    return TPROOT##_new(sinr*cosh(a.imag), cosr*sinh(a.imag)); \
+    REAL_TP sinr = sincos(TPROOT##_real(a), &cosr); \
+    return TPROOT##_new(sinr*cosh(TPROOT##_imag(a)), cosr*sinh(TPROOT##_imag(a))); \
   } \
   \
   inline TP TPROOT##_cos(TP a) \
   { \
     REAL_TP cosr; \
-    REAL_TP sinr = sincos(a.real, &cosr); \
-    return TPROOT##_new(cosr*cosh(a.imag), -sinr*sinh(a.imag)); \
+    REAL_TP sinr = sincos(TPROOT##_real(a), &cosr); \
+    return TPROOT##_new(cosr*cosh(TPROOT##_imag(a)), -sinr*sinh(TPROOT##_imag(a))); \
   } \
   \
   inline TP TPROOT##_tan(TP a) \
   { \
-    REAL_TP re2 = 2.f * a.real; \
-    REAL_TP im2 = 2.f * a.imag; \
+    REAL_TP re2 = 2.f * TPROOT##_real(a); \
+    REAL_TP im2 = 2.f * TPROOT##_imag(a); \
     \
     const REAL_TP limit = log(REAL_3LTR##_MAX); \
     \
@@ -240,21 +240,21 @@
   inline TP TPROOT##_sinh(TP a) \
   { \
     REAL_TP cosi; \
-    REAL_TP sini = sincos(a.imag, &cosi); \
-    return TPROOT##_new(sinh(a.real)*cosi, cosh(a.real)*sini); \
+    REAL_TP sini = sincos(TPROOT##_imag(a), &cosi); \
+    return TPROOT##_new(sinh(TPROOT##_real(a))*cosi, cosh(TPROOT##_real(a))*sini); \
   } \
   \
   inline TP TPROOT##_cosh(TP a) \
   { \
     REAL_TP cosi; \
-    REAL_TP sini = sincos(a.imag, &cosi); \
-    return TPROOT##_new(cosh(a.real)*cosi, sinh(a.real)*sini); \
+    REAL_TP sini = sincos(TPROOT##_imag(a), &cosi); \
+    return TPROOT##_new(cosh(TPROOT##_real(a))*cosi, sinh(TPROOT##_real(a))*sini); \
   } \
   \
   inline TP TPROOT##_tanh(TP a) \
   { \
-    REAL_TP re2 = 2.f * a.real; \
-    REAL_TP im2 = 2.f * a.imag; \
+    REAL_TP re2 = 2.f * TPROOT##_real(a); \
+    REAL_TP im2 = 2.f * TPROOT##_imag(a); \
     \
     const REAL_TP limit = log(REAL_3LTR##_MAX); \
     \
