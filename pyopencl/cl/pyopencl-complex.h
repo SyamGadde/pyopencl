@@ -30,26 +30,34 @@
 
 #pragma once
 
+#ifdef PYOPENCL_COMPLEX_USE_VECTOR
+#define PYOPENCL_COMPLEX_REAL x
+#define PYOPENCL_COMPLEX_IMAG y
+#else
+#define PYOPENCL_COMPLEX_REAL real
+#define PYOPENCL_COMPLEX_IMAG imag
+#endif
+
 #define PYOPENCL_DECLARE_COMPLEX_TYPE_INT(REAL_TP, REAL_3LTR, TPROOT, TP) \
   \
-  inline REAL_TP TPROOT##_real(TP a) { return a.real; } \
-  inline REAL_TP TPROOT##_imag(TP a) { return a.imag; }        \
+  inline REAL_TP TPROOT##_real(TP a) { return a.PYOPENCL_COMPLEX_REAL; } \
+  inline REAL_TP TPROOT##_imag(TP a) { return a.PYOPENCL_COMPLEX_IMAG; }        \
   inline REAL_TP TPROOT##_abs(TP a) { return hypot(TPROOT##_real(a), TPROOT##_imag(a)); }   \
   inline REAL_TP TPROOT##_abs_squared(TP a) { return TPROOT##_real(a) * TPROOT##_real(a) + TPROOT##_imag(a) * TPROOT##_imag(a); } \
   \
   inline TP TPROOT##_new(REAL_TP real, REAL_TP imag)  \
   { \
     TP result; \
-    TPROOT##_real(result) = real;		\
-    TPROOT##_imag(result) = imag;		\
+    result.PYOPENCL_COMPLEX_REAL = real;		\
+    result.PYOPENCL_COMPLEX_IMAG = imag;		\
     return result; \
   } \
   \
   inline TP TPROOT##_fromreal(REAL_TP real)     \
   { \
     TP result; \
-    TPROOT##_real(result) = real;		\
-    TPROOT##_imag(imag) = 0;			\
+    result.PYOPENCL_COMPLEX_REAL = real;		\
+    result.PYOPENCL_COMPLEX_IMAG = 0;			\
     return result; \
   } \
   \
@@ -183,15 +191,15 @@
     TP result; \
     \
     if (mag == 0.f) { \
-      TPROOT##_real(result) = TPROOT##_imag(result) = 0.f; \
+      result.PYOPENCL_COMPLEX_REAL = result.PYOPENCL_COMPLEX_IMAG = 0.f; \
     } else if (re > 0.f) { \
-      TPROOT##_real(result) = sqrt(0.5f * (mag + re)); \
-      TPROOT##_imag(result) = im/TPROOT##_real(result)/2.f; \
+      result.PYOPENCL_COMPLEX_REAL = sqrt(0.5f * (mag + re)); \
+      result.PYOPENCL_COMPLEX_IMAG = im/TPROOT##_real(result)/2.f; \
     } else { \
-      TPROOT##_imag(result) = sqrt(0.5f * (mag - re)); \
+      result.PYOPENCL_COMPLEX_IMAG = sqrt(0.5f * (mag - re)); \
       if (im < 0.f) \
-        TPROOT##_imag(result) = - TPROOT##_imag(result); \
-      TPROOT##_real(result) = im/TPROOT##_imag(result)/2.f; \
+        result.PYOPENCL_COMPLEX_IMAG = - TPROOT##_imag(result); \
+      result.PYOPENCL_COMPLEX_REAL = im/TPROOT##_imag(result)/2.f; \
     } \
     return result; \
   } \
@@ -267,19 +275,27 @@
     } \
   } \
 
-#define PYOPENCL_DECLARE_COMPLEX_TYPE(BASE, BASE_3LTR) \
+
+#ifdef PYOPENCL_COMPLEX_USE_VECTOR
+#define PYOPENCL_DECLARE_COMPLEX_TYPE_INT0(BASE) \
+  typedef BASE##2 c##BASE##_t;
+#else
+#define PYOPENCL_DECLARE_COMPLEX_TYPE_INT0(BASE) \
   typedef union \
   { \
     struct { BASE x, y; }; \
     struct { BASE real, imag; }; \
-  } c##BASE##_t; \
-  \
+  } c##BASE##_t;
+#endif
+
+#define PYOPENCL_DECLARE_COMPLEX_TYPE(BASE, BASE_3LTR) \
+  PYOPENCL_DECLARE_COMPLEX_TYPE_INT0(BASE) \
   PYOPENCL_DECLARE_COMPLEX_TYPE_INT(BASE, BASE_3LTR, c##BASE, c##BASE##_t)
 
 PYOPENCL_DECLARE_COMPLEX_TYPE(float, FLT);
-#define cfloat_cast(a) cfloat_new((a).real, (a).imag)
+#define cfloat_cast(a) cfloat_new((a).PYOPENCL_COMPLEX_REAL, (a).PYOPENCL_COMPLEX_IMAG)
 
 #ifdef PYOPENCL_DEFINE_CDOUBLE
 PYOPENCL_DECLARE_COMPLEX_TYPE(double, DBL);
-#define cdouble_cast(a) cdouble_new((a).real, (a).imag)
+#define cdouble_cast(a) cdouble_new((a).PYOPENCL_COMPLEX_REAL, (a).PYOPENCL_COMPLEX_IMAG)
 #endif
